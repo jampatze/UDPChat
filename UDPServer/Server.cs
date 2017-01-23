@@ -13,14 +13,13 @@ namespace UDPServer
     /// </summary>
     class UDPServer
     {
-        // Holds the info of client connected to server
+        // Holds the info of a single client connected to server
         struct ClientInfo
         {
             public EndPoint endpoint;
             public string name;
         }
 
-        List<ClientInfo> clients = new List<ClientInfo>();
 
         /// <summary>
         /// Main
@@ -31,6 +30,7 @@ namespace UDPServer
             int port = 9999;
             byte[] byteData = new byte[1024];
             Socket serverSocket;
+            List<ClientInfo> clients = new List<ClientInfo>();
             IPEndPoint iep = new IPEndPoint(IPAddress.Any, port);
 
             // try to boot up the server
@@ -59,30 +59,18 @@ namespace UDPServer
                 // recieve data
                 serverSocket.ReceiveFrom(byteData, ref epSender);
 
-                if (clients)
-            }
-        }
-
-        /// <summary>
-        /// Parses the AsyncCallback and prints it
-        /// </summary>
-        /// <param name="asyncResult"></param>
-        private void OnRecieve(IAsyncResult asyncResult)
-        {
-            try
-            {
+                // when data is recieved
                 byte[] data;
 
-                CustomPacket recievedData = new CustomPacket(this.byteData);
+                CustomPacket recievedData = new CustomPacket(byteData);
                 CustomPacket sendData = new CustomPacket();
-                IPEndPoint clients = new IPEndPoint(IPAddress.Any, 0);
-                EndPoint epSender = (EndPoint)clients;
-
-                serverSocket.EndReceiveFrom(asyncResult, ref epSender);
+                IPEndPoint clientsIEP = new IPEndPoint(IPAddress.Any, 0);
+                EndPoint epSenders = (EndPoint)clientsIEP;
 
                 sendData.cmdCommand = recievedData.cmdCommand;
                 sendData.strName = recievedData.strName;
 
+                // parse the recieved data
                 switch (recievedData.cmdCommand)
                 {
                     case Command.Message:
@@ -93,16 +81,16 @@ namespace UDPServer
                         ClientInfo client = new ClientInfo();
                         client.endpoint = epSender;
                         client.name = recievedData.strName;
-                        this.clients.Add(client);
+                        clients.Add(client);
                         sendData.strMessage = string.Format(">>>{0} has logged in<<<", recievedData.strName);
                         break;
 
                     case Command.Logout:
-                        foreach (ClientInfo c in this.clients)
+                        foreach (ClientInfo c in clients)
                         {
                             if (c.endpoint.Equals(epSender))
                             {
-                                this.clients.Remove(c);
+                                clients.Remove(c);
                                 break;
                             }
                         }
@@ -112,39 +100,26 @@ namespace UDPServer
 
                 data = sendData.ToByte();
 
-                foreach (ClientInfo c in this.clients)
+                // send the message to clients
+                foreach (ClientInfo c in clients)
                 {
-                    if (c.endpoint != epSender ||sendData.cmdCommand != Command.Login)
+                    try
                     {
-                        serverSocket.BeginSendTo(data, 0, data.Length, SocketFlags.None, c.endpoint, new AsyncCallback(this.SendData), c.endpoint);
+                        if (c.endpoint != epSender || sendData.cmdCommand != Command.Login)
+                        {
+                            serverSocket.SendTo(sendData.ToByte(), c.endpoint);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("SendData error:" + ex.Message);
+                        break;
                     }
                 }
 
-                // Continue listening
-                serverSocket.BeginReceiveFrom(byteData, 0, byteData.Length, SocketFlags.None, ref epSender, new AsyncCallback(OnRecieve), epSender);
-                // print the chat message:
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error while recieving:" + ex);
-            }
-        }
 
-
-        /// <summary>
-        /// Sends data
-        /// </summary>
-        /// <param name="asyncResult"></param>
-        public void SendData(IAsyncResult asyncResult)
-        {
-            try
-            {
-                serverSocket.EndSend(asyncResult);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("SendData error:" + ex.Message);
-            }
+            serverSocket.Close();
         }
     }
 }
