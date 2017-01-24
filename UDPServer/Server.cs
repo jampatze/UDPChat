@@ -10,6 +10,8 @@ namespace UDPServer
 {
     /// <summary>
     /// A simple UDP-server client that echoes messages sent to all chat clients
+    /// Why is this implemented as a command line program?
+    /// I know it's not the best way, but I just wanted to.
     /// </summary>
     class UDPServer
     {
@@ -49,6 +51,7 @@ namespace UDPServer
             Console.WriteLine("Waiting for clients...");
 
             // recieve data
+            // ATTN! needs to recieve something from a client before the server can be closed
             while (!Console.KeyAvailable)
             {
 
