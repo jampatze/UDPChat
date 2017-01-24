@@ -78,6 +78,7 @@ namespace UDPServer
                 {
                     case Command.Message:
                         sendData.strMessage = string.Format("{0}: {1}", recievedData.strName, recievedData.strMessage);
+                        Console.WriteLine(string.Format("{0}: {1}", recievedData.strName, recievedData.strMessage));
                         break;
 
                     case Command.Login:
@@ -86,6 +87,7 @@ namespace UDPServer
                         client.name = recievedData.strName;
                         clients.Add(client);
                         sendData.strMessage = string.Format(">>>{0} has logged in<<<", recievedData.strName);
+                        Console.WriteLine(string.Format(">>>{0} has logged in<<<", recievedData.strName));
                         break;
 
                     case Command.Logout:
@@ -97,7 +99,8 @@ namespace UDPServer
                                 break;
                             }
                         }
-                        sendData.strMessage = string.Format(">>>{0} has logged in<<< ", recievedData.strName);
+                        sendData.strMessage = string.Format(">>>{0} has logged out<<< ", recievedData.strName);
+                        Console.WriteLine(string.Format(">>>{0} has logged out<<< ", recievedData.strName));
                         break;
                 }
 
