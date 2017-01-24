@@ -111,10 +111,7 @@ namespace UDPServer
                 {
                     try
                     {
-                        if (c.endpoint != epSender || sendData.cmdCommand != Command.Login)
-                        {
-                            serverSocket.SendTo(sendData.ToByte(), c.endpoint);
-                        }
+                        serverSocket.SendTo(sendData.ToByte(), c.endpoint);
                     }
                     catch (Exception ex)
                     {
