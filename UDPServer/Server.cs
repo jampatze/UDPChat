@@ -116,6 +116,17 @@ namespace UDPServer
                         sendData.strMessage = string.Format(">>>{0} has logged out<<< ", recievedData.strName);
                         Console.WriteLine(string.Format(">>>{0} has logged out<<< ", recievedData.strName));
                         break;
+
+                    case Command.List:
+                        sendData.cmdCommand = Command.List;
+                        sendData.strName = null;
+                        sendData.strMessage = null;
+
+                        foreach (ClientInfo c in clients)
+                        {
+                            sendData.strMessage += c.name + "*";
+                        }
+                        break;
                 }
 
                 data = sendData.ToByte();
