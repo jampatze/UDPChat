@@ -29,7 +29,21 @@ namespace UDPServer
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            int port = 9999;
+            
+
+            // Ask for port
+            System.Console.WriteLine("Insert a port number:");
+            string userInput = Console.ReadLine();
+            int port;
+            while (!Int32.TryParse(userInput, out port))
+            {
+                Console.WriteLine("Insert a valid port number");
+                System.Console.WriteLine("Insert a port number:");
+                userInput = Console.ReadLine();
+            }
+
+            Console.WriteLine("Starting server in port " + port);
+
             byte[] byteData = new byte[1024];
             Socket serverSocket;
             List<ClientInfo> clients = new List<ClientInfo>();
